@@ -1,0 +1,67 @@
+-- MySQL POS Sistem Veritabanı Şeması
+-- Karakter seti ve sıralama
+CREATE DATABASE IF NOT EXISTS pos_app CHARACTER SET utf8mb4 COLLATE utf8mb4_turkish_ci;
+USE pos_app;
+
+-- MENU TABLOSU
+CREATE TABLE IF NOT EXISTS menu (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_menu_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci;
+
+-- ORDERS TABLOSU
+CREATE TABLE IF NOT EXISTS orders (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  tax DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  service_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  note VARCHAR(255) NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_orders_date (date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci;
+
+-- ORDER ITEMS TABLOSU
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id INT UNSIGNED NOT NULL,
+  menu_id INT UNSIGNED NOT NULL,
+  quantity INT UNSIGNED NOT NULL DEFAULT 1,
+  price DECIMAL(10,2) NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_order_items_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  CONSTRAINT fk_order_items_menu FOREIGN KEY (menu_id) REFERENCES menu(id),
+  INDEX idx_order_items_order (order_id),
+  INDEX idx_order_items_menu (menu_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci;
+
+-- OPSIYONEL: USERS TABLOSU
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(100) NULL,
+  role ENUM('admin','cashier') NOT NULL DEFAULT 'cashier',
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci;
+
+-- Örnek veriler
+INSERT INTO menu (name, price) VALUES
+('Çay', 2.50),
+('Kahve', 5.00),
+('Tost', 8.50),
+('Hamburger', 15.00),
+('Çorba', 12.00),
+('Salata', 18.00),
+('Kebap', 45.00),
+('Ayran', 8.00),
+('Su', 3.00),
+('Kola', 6.00);
+
